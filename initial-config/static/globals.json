@@ -1,0 +1,106 @@
+{
+    "version": 1,
+    "title": "wicked.haufe.io API Portal",
+    "footer": "&copy; 2016 Your Company Ltd.",
+    "api": {
+        "headerName": "X-ApiKey"
+    },
+    "network": {
+        "schema": "https",
+        "apiHost": "api.portal.local",
+        "portalHost": "portal.local",
+        "apiUrl": "$PORTAL_API_URL",
+        "portalUrl": "$PORTAL_PORTAL_URL",
+        "kongAdapterUrl": "$PORTAL_KONG_ADAPTER_URL",
+        "kongAdminUrl": "$PORTAL_KONG_ADMIN_URL",
+        "mailerUrl": "$PORTAL_MAILER_URL",
+        "chatbotUrl": "$PORTAL_CHATBOT_URL"
+    },
+    "db": {
+        "staticConfig": "$PORTAL_API_STATIC_CONFIG",
+        "dynamicConfig": "$PORTAL_API_DYNAMIC_CONFIG"
+    },
+    "initialUsers": [
+        {
+            "id": "1",
+            "firstName": "Admin",
+            "lastName": "User",
+            "email": "admin@foo.com",
+            "password": "wicked",
+            "validated": true,
+            "groups": [
+                "admin"
+            ]
+        }
+    ],
+    "recaptcha": {
+        "useRecaptcha": false,
+        "secretKey": "reCaptchaSecretKey",
+        "websiteKey": "reCaptchaWebsiteKey"
+    },
+    "mailer": {
+        "useMailer": false,
+        "senderEmail": "apiportal@yourcompany.com",
+        "senderName": "The wicked API Portal",
+        "smtpHost": "smtp.yourcompany.com",
+        "anonymous": false,
+        "forceSecure": false,
+        "smtpPort": 465,
+        "username": "smtpuser",
+        "password": "smtppassword",
+        "adminEmail": "adminemail@yourcompany.com",
+        "adminName": "Admin Name"
+    },
+    "chatbot": {
+        "useChatbot": false,
+        "username": "wicked.haufe.io",
+        "hookUrls": [
+            "https://yourinstance.slack.com/thisisahookurlyouneedtogetfromyourslackadmin"
+        ],
+        "icon_url": "https://raw.githubusercontent.com/Haufe-Lexware/wicked.haufe.io/master/public/wicked-40.png",
+        "events": {
+            "userSignedUp": true,
+            "userValidatedEmail": true,
+            "applicationAdded": true,
+            "applicationDeleted": true,
+            "subscriptionAdded": true,
+            "subscriptionDeleted": true,
+            "approvalRequired": true,
+            "lostPasswordRequest": true,
+            "verifyEmailRequest": true
+        }
+    },
+    "auth": {
+        "local": {
+            "useLocal": true,
+            "trustLocal": false
+        },
+        "adfs": {
+            "useAdfs": false,
+            "clientSecret": "this-is-your-client-secret",
+            "tokenURL": "https://identity.yourcompany.com/adfs/oauth2/token",
+            "customIdField": "upn",
+            "resource": "https://api.yourcompany.com",
+            "clientID": "this-is-your-client-id",
+            "lastNameField": "family_name",
+            "emailField": "email",
+            "firstNameField": "given_name",
+            "authorizationURL": "https://identity.yourcompany.com/adfs/oauth2/authorize",
+            "callbackURL": "https://portal.yourcompany.com/callback",
+            "verifyCert": true,
+            "publicCert": "----BEGIN CERTIFICATE-----\r\nfdkjhfkljdshglkdfhgklsdfhgkldsfhgkjsdfkgjhf\r\n------END----"
+        },
+        "github": {
+            "useGithub": false,
+            "clientSecret": "github-client-secret",
+            "clientID": "github-client-id",
+            "callbackURL": "https://portal.yourcompany.com/callback/github"
+        },
+        "google": {
+            "useGoogle": false,
+            "clientSecret": "google-client-secret",
+            "clientID": "google-app-client-id",
+            "callbackURL": "https://portal.yourcompany.com/callback/google"
+        }
+    }
+}
