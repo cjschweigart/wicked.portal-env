@@ -4,13 +4,13 @@ var fs = require('fs');
 var path = require('path');
 
 var dirs = [
-    'portal',
-    'portal-api',
-    'portal-chatbot',
-    'portal-env',
-    'portal-kong-adapter',
-    'portal-mailer',
-    'portal-kickstarter'
+    'wicked.portal',
+    'wicked.portal-api',
+    'wicked.portal-chatbot',
+    'wicked.portal-env',
+    'wicked.portal-kong-adapter',
+    'wicked.portal-mailer',
+    'wicked.portal-kickstarter'
 ];
 
 var baseDir = path.resolve(path.join(__dirname, '..'));
@@ -41,7 +41,7 @@ for (var i=0; i<dirs.length; ++i) {
 }
 
 // Re-add the portal-env we filtered out above
-allDependencies['portal-env'] = '../portal-env';
+allDependencies['portal-env'] = '../portal-env.tgz';
 
 var thisPackage = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
 thisPackage.dependencies = allDependencies;
