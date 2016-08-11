@@ -3,7 +3,7 @@ version: '2'
 services:
 
   publb:
-    image: dockercloud/haproxy:%%HAPROXY_VERSION%%
+    image: dockercloud/haproxy:{{haProxyVersion}}
     ports:
     - "443:443"
     - "1936:1936"
@@ -18,13 +18,13 @@ services:
     restart: unless-stopped
 
   kongdb-data:
-    image: postgres:%%POSTGRES_VERSION%%
+    image: postgres:{{postgresVersion}}
     volumes:
     - "/var/lib/postgresql/data"
     command: "/bin/true"
 
   kong-database:
-    image: postgres:%%POSTGRES_VERSION%%
+    image: postgres:{{postgresVersion}}
     volumes_from:
     - "kongdb-data"
     environment:
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   kong:
-    image: %%DOCKER_PREFIX%%kong:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}kong:{{dockerTag}}
     depends_on:
     - "kong-database"
     security_opt:
@@ -42,7 +42,7 @@ services:
     - "8000"
     environment:
     - "DATABASE=postgres"
-    - "VIRTUAL_HOST=https://%%API_HOST%%:443"
+    - "VIRTUAL_HOST=https://{{apiHost}}:443"
     - "VIRTUAL_HOST_WEIGHT=100"
     - "EXCLUDE_PORTS=7946,8001,8443"
     - "EXTRA_SETTINGS=http-request set-header X-Forwarded-Port %[dst_port]"
@@ -58,14 +58,14 @@ services:
     command: "/bin/true"
 
   portal-api-data-dynamic:
-    image: %%DOCKER_PREFIX%%portal-api:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}portal-api:{{dockerTag}}
     volumes:
     - "/var/portal-api/dynamic"
     command: "/bin/true"
 
   portal-api:
     env_file: variables.env  
-    image: %%DOCKER_PREFIX%%portal-api:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}portal-api:{{dockerTag}}
     volumes_from:
     - "portal-api-data-static"
     - "portal-api-data-dynamic"
@@ -73,13 +73,13 @@ services:
 
   portal:
     env_file: variables.env  
-    image: %%DOCKER_PREFIX%%portal:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}portal:{{dockerTag}}
     depends_on:
     - "portal-api"
     expose:
     - "3000"
     environment:
-    - "VIRTUAL_HOST=https://%%PORTAL_HOST%%:443"
+    - "VIRTUAL_HOST=https://{{portalHost}}:443"
     - "VIRTUAL_HOST_WEIGHT=0"
     - "SSL_CERT=${PORTAL_PEM}"
     command: "npm start"
@@ -87,7 +87,7 @@ services:
 
   portal-kong-adapter:
     env_file: variables.env  
-    image: %%DOCKER_PREFIX%%portal-kong-adapter:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}portal-kong-adapter:{{dockerTag}}
     depends_on:
     - "portal-api"
     restart: unless-stopped
@@ -95,7 +95,7 @@ services:
 
   portal-mailer:
     env_file: variables.env  
-    image: %%DOCKER_PREFIX%%portal-mailer:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}portal-mailer:{{dockerTag}}
     restart: unless-stopped
     depends_on:
     - "portal-api"
@@ -103,7 +103,7 @@ services:
   
   portal-chatbot:
     env_file: variables.env  
-    image: %%DOCKER_PREFIX%%portal-chatbot:%%DOCKER_TAG%%
+    image: {{{dockerPrefix}}}portal-chatbot:{{dockerTag}}
     restart: unless-stopped
     depends_on:
     - "portal-api"

@@ -1,4 +1,4 @@
-FROM %%DOCKER_PREFIX%%portal-api:%%DOCKER_TAG%%
+FROM {{{dockerPrefix}}}portal-api:{{dockerTag}}
 
 COPY . /tmp/portal-api
 
