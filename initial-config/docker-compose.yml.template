@@ -1,0 +1,110 @@
+version: '2'
+
+services:
+
+  publb:
+    image: dockercloud/haproxy:%%HAPROXY_VERSION%%
+    ports:
+    - "443:443"
+    - "1936:1936"
+    links:
+    - portal
+    - kong
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+    - "STATS_AUTH=stats:stats"
+    - "STATS_PORT=1936"
+    restart: unless-stopped
+
+  kongdb-data:
+    image: postgres:%%POSTGRES_VERSION%%
+    volumes:
+    - "/var/lib/postgresql/data"
+    command: "/bin/true"
+
+  kong-database:
+    image: postgres:%%POSTGRES_VERSION%%
+    volumes_from:
+    - "kongdb-data"
+    environment:
+    - "POSTGRES_USER=kong"
+    - "POSTGRES_PASSWORD=kong"
+    restart: unless-stopped
+
+  kong:
+    image: %%DOCKER_PREFIX%%kong:%%DOCKER_TAG%%
+    depends_on:
+    - "kong-database"
+    security_opt:
+    - seccomp:unconfined
+    expose:
+    - "8000"
+    environment:
+    - "DATABASE=postgres"
+    - "VIRTUAL_HOST=https://%%API_HOST%%:443"
+    - "VIRTUAL_HOST_WEIGHT=100"
+    - "EXCLUDE_PORTS=7946,8001,8443"
+    - "EXTRA_SETTINGS=http-request set-header X-Forwarded-Port %[dst_port]"
+    - "SSL_CERT=${GATEWAY_PEM}"
+    command: "dockerize -timeout 30s -wait tcp://kong-database:5432 kong start"
+    restart: unless-stopped
+
+  portal-api-data-static:
+    build: 
+      context: static
+    volumes:
+    - "/var/portal-api/static"
+    command: "/bin/true"
+
+  portal-api-data-dynamic:
+    image: %%DOCKER_PREFIX%%portal-api:%%DOCKER_TAG%%
+    volumes:
+    - "/var/portal-api/dynamic"
+    command: "/bin/true"
+
+  portal-api:
+    env_file: variables.env  
+    image: %%DOCKER_PREFIX%%portal-api:%%DOCKER_TAG%%
+    volumes_from:
+    - "portal-api-data-static"
+    - "portal-api-data-dynamic"
+    restart: unless-stopped
+
+  portal:
+    env_file: variables.env  
+    image: %%DOCKER_PREFIX%%portal:%%DOCKER_TAG%%
+    depends_on:
+    - "portal-api"
+    expose:
+    - "3000"
+    environment:
+    - "VIRTUAL_HOST=https://%%PORTAL_HOST%%:443"
+    - "VIRTUAL_HOST_WEIGHT=0"
+    - "SSL_CERT=${PORTAL_PEM}"
+    command: "npm start"
+    restart: unless-stopped
+
+  portal-kong-adapter:
+    env_file: variables.env  
+    image: %%DOCKER_PREFIX%%portal-kong-adapter:%%DOCKER_TAG%%
+    depends_on:
+    - "portal-api"
+    restart: unless-stopped
+    command: "npm start"
+
+  portal-mailer:
+    env_file: variables.env  
+    image: %%DOCKER_PREFIX%%portal-mailer:%%DOCKER_TAG%%
+    restart: unless-stopped
+    depends_on:
+    - "portal-api"
+    command: "npm start"
+  
+  portal-chatbot:
+    env_file: variables.env  
+    image: %%DOCKER_PREFIX%%portal-chatbot:%%DOCKER_TAG%%
+    restart: unless-stopped
+    depends_on:
+    - "portal-api"
+    command: "npm start"
