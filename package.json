@@ -1,20 +1,20 @@
 {
-  "name": "portal-env",
-  "version": "0.9.0",
-  "description": "Base package for the portal; contains all package dependencies to speed up Docker build.",
-  "main": "env-reader.js",
+  "version": "0.9.1", 
+  "license": "MIT", 
+  "author": "Martin Danielsson", 
+  "description": "Base package for the portal; contains all package dependencies to speed up Docker build.", 
+  "dependencies": {
+    "debug": "2.2.0", 
+    "node-uuid": "1.4.7", 
+    "request": "2.74.0"
+  }, 
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Martin Danielsson",
-  "license": "MIT",
-  "dependencies": {
-    "debug": "2.2.0",
-    "node-uuid": "1.4.7",
-    "request": "2.74.0"
-  },
+  }, 
+  "main": "env-reader.js", 
   "jshintConfig": {
-    "node": true,
+    "node": true, 
     "esversion": 6
-  }
+  }, 
+  "name": "portal-env"
 }
