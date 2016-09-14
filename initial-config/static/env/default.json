@@ -1,11 +1,27 @@
 {
+    "PORTAL_CONFIG_BASE": {
+        "encrypted": false,
+        "value": "/var/portal-api/"
+    },
     "PORTAL_API_STATIC_CONFIG": {
         "encrypted": false,
-        "value": "/var/portal-api/static"
+        "value": "${PORTAL_CONFIG_BASE}static"
     },
     "PORTAL_API_DYNAMIC_CONFIG": {
         "encrypted": false,
-        "value": "/var/portal-api/dynamic"
+        "value": "${PORTAL_CONFIG_BASE}dynamic"
+    },
+    "PORTAL_NETWORK_SCHEMA": {
+        "encrypted": false,
+        "value": "https"
+    },
+    "PORTAL_NETWORK_APIHOST": {
+        "encrypted": false,
+        "value": "api.portal.local"
+    },
+    "PORTAL_NETWORK_PORTALHOST": {
+        "encrypted": false,
+        "value": "portal.local"
     },
     "PORTAL_API_URL": {
         "encrypted": false,
