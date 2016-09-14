@@ -1,5 +1,5 @@
 {
-  "version": "0.9.1", 
+  "version": "0.9.2", 
   "license": "MIT", 
   "author": "Martin Danielsson", 
   "description": "Base package for the portal; contains all package dependencies to speed up Docker build.", 
