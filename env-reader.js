@@ -13,6 +13,7 @@ var cryptTools = require('./crypt-tools');
 var envReader = function () { };
 
 envReader.resolveStaticConfig = function() {
+    debug('resolveStaticConfig():');
     var configDir;
     if (process.env.PORTAL_API_STATIC_CONFIG) {
         configDir = process.env.PORTAL_API_STATIC_CONFIG;
@@ -24,20 +25,25 @@ envReader.resolveStaticConfig = function() {
     var globalFile = path.join(configDir, 'globals.json');
     if (!fs.existsSync(globalFile))
         throw new Error('Could not resolve static configuration path; tried PORTAL_API_STATIC_CONFIG, checked PORTAL_CONFIG_BASE and /var/portal-api/static.');
+    debug(configDir);
     return configDir;
 };
 
 envReader.getInitialConfigPath = function () {
-    return path.join(__dirname, 'initial-config', 'static');
+    const configPath = path.join(__dirname, 'initial-config', 'static');
+    debug('getInitialConfigPath(): ' + configPath);
+    return configPath;
 };
 
 envReader.guessServiceUrl = function (defaultHost, defaultPort) {
+    debug('guessServiceUrl() - defaultHost: ' + defaultHost + ', defaultPort: ' + defaultPort);
     var url = 'http://' + defaultHost + ':' + defaultPort + '/';
     // Are we not running on Linux? Then guess we're in local development mode.
     if (os.type() != 'Linux') {
         let defaultLocalIP = getDefaultLocalIP();
         url = 'http://' + defaultLocalIP + ':' + defaultPort + '/';
     }
+    debug(url);
     return url;
 };
 
@@ -58,11 +64,12 @@ envReader.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
 };
 
 envReader.checkEnvironment = function (staticConfigPath, keyText, envName) {
+    debug('checkEnvironment() - ' + staticConfigPath + ', env: ' + envName);
     if (!keyText)
         console.log('INFO: No key was passed to checkEnvironment; can only read plain text content.');
     console.log('Reading config from: ' + staticConfigPath);
 
-    if ('default' != envName)
+    if ('default' !== envName)
         loadEnvironment(staticConfigPath, keyText, envName);
     loadEnvironment(staticConfigPath, keyText, 'default');
 
@@ -132,6 +139,7 @@ function replaceEnvVarsInString(s) {
 }
 
 function loadEnvironment(staticConfigPath, keyText, envName) {
+    debug('loadEnvironment() - ' + staticConfigPath);
     var envFileName = path.join(staticConfigPath, 'env', envName + '.json');
     if (!fs.existsSync(envFileName))
         throw new Error('portal-env: Could not find environment file: ' + envFileName);
@@ -159,6 +167,7 @@ function loadEnvironment(staticConfigPath, keyText, envName) {
 }
 
 envReader.sanityCheckDir = function (dirName) {
+    debug('sanityCheckDir() - ' + dirName);
     // Pre-fill some vars we always need
     var envDict = {
         PORTAL_API_STATIC_CONFIG: ['(implicit)'],
@@ -206,6 +215,7 @@ envReader.sanityCheckDir = function (dirName) {
 //   "PORTAL_API_USERS_APIURL": [ "/Users/hellokitty/Projects/config/static/apis/users/config.json" ],   
 // }
 envReader.gatherEnvVarsInDir = function (dirName, envDict) {
+    debug('gatherEnvVarsInDir(): ' + dirName);
     var fileNames = fs.readdirSync(dirName);
     for (var i = 0; i < fileNames.length; ++i) {
         var fileName = path.join(dirName, fileNames[i]);
@@ -219,6 +229,7 @@ envReader.gatherEnvVarsInDir = function (dirName, envDict) {
 };
 
 function gatherEnvVarsInFile(fileName, envDict) {
+    debug('gatherEnvVarsInFile() - ' + fileName);
     var ob = JSON.parse(fs.readFileSync(fileName, 'utf8'));
     gatherEnvVarsInObject(fileName, ob, envDict);
 }

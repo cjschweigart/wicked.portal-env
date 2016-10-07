@@ -8,7 +8,7 @@ if (process.argv.length < 3) {
 
 var url = process.argv[2];
 
-var tries = 50;
+var tries = 100;
 var timeout = 500;
 
 console.log('Awaiting an answer from ' + url);

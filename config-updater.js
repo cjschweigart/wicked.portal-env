@@ -4,11 +4,12 @@ var fs = require('fs');
 var path = require('path');
 var debug = require('debug')('portal-env:config-updater');
 
-var updater = function() { };
+var updater = function () { };
 
 var updateSteps = {
     1: updateStep1_June2016,
-    2: updateStep2_June2016
+    2: updateStep2_June2016,
+    3: updateStep3_Oct2016
 };
 
 updater.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
@@ -20,8 +21,8 @@ updater.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
     var currentVersion = 0;
     if (targetGlobals.version)
         currentVersion = targetGlobals.version;
-        
-    debug('Starting at config version: ' + currentVersion);    
+
+    debug('Starting at config version: ' + currentVersion);
 
     for (var step in updateSteps) {
         if (currentVersion < step)
@@ -30,13 +31,15 @@ updater.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
 };
 
 function makeConfigPaths(basePath) {
+    debug('makeConfigPaths() - ' + basePath);
     var globalsFile = path.join(basePath, 'globals.json');
     var apisDir = path.join(basePath, 'apis');
     var contentDir = path.join(basePath, 'content');
     var groupsDir = path.join(basePath, 'groups');
     var templatesDir = path.join(basePath, 'templates');
     var emailDir = path.join(templatesDir, 'email');
-    
+    var plansFile = path.join(basePath, 'plans', 'plans.json');
+
     return {
         basePath: basePath,
         globalsFile: globalsFile,
@@ -45,7 +48,8 @@ function makeConfigPaths(basePath) {
         groupsDir: groupsDir,
         templatesDir: templatesDir,
         emailDir: emailDir,
-        chatbotTemplates: path.join(templatesDir, 'chatbot.json')
+        chatbotTemplates: path.join(templatesDir, 'chatbot.json'),
+        plansFile: plansFile
     };
 }
 
@@ -59,6 +63,40 @@ function saveGlobals(config, glob) {
     fs.writeFileSync(config.globalsFile, JSON.stringify(glob, null, 2), 'utf8');
 }
 
+function loadApis(config) {
+    debug('loadApis() - ' + config.apisDir);
+    return JSON.parse(fs.readFileSync(path.join(config.apisDir, 'apis.json'), 'utf8'));
+}
+
+function getApiConfigFileName(config, apiId) {
+    return path.join(config.apisDir, apiId, 'config.json');
+}
+
+function loadApiConfig(config, apiId) {
+    debug('loadApiConfig() - ' + config.apisDir + ', API ' + apiId);
+    return JSON.parse(fs.readFileSync(getApiConfigFileName(config, apiId), 'utf8'));
+}
+
+function saveApiConfig(config, apiId, apiConfig) {
+    debug('saveApiConfig() - ' + config.apisDir + ', API ' + apiId);
+    debug('apiConfig.api:');
+    debug(apiConfig.api);
+    debug('apiConfig.plugins:');
+    debug(apiConfig.plugins);
+    fs.writeFileSync(getApiConfigFileName(config, apiId), JSON.stringify(apiConfig, null, 2), 'utf8');
+}
+
+function loadPlans(config) {
+    debug('loadPlans() - ' + config.plansFile);
+    return JSON.parse(fs.readFileSync(config.plansFile, 'utf8'));
+}
+
+function savePlans(config, plans) {
+    debug('savePlans() - ' + config.plansFile);
+    debug(plans);
+    fs.writeFileSync(config.plansFile, JSON.stringify(plans, null, 2));
+}
+
 function copyTextFile(source, target) {
     debug('copyTextFile("' + source + '", "' + target + '")');
     fs.writeFileSync(target, fs.readFileSync(source, 'utf8'), 'utf8');
@@ -67,6 +105,73 @@ function copyTextFile(source, target) {
 function copyFile(source, target) {
     debug('copyFile("' + source + '", "' + target + '")');
     fs.writeFileSync(target, fs.readFileSync(source));
+}
+
+function updateStep3_Oct2016(targetConfig, sourceConfig) {
+    debug('Performing updateStep3_Oct2016()');
+
+    var targetGlobals = loadGlobals(targetConfig);
+    targetGlobals.version = 3;
+
+    // Kong API change (tsk tsk, don't do that, please)
+    // Change all rate-limiting and response-ratelimiting plugins, rename
+    // continue_on_error to fault_tolerant and remove async.
+    const apis = loadApis(targetConfig);
+    for (let i = 0; i < apis.apis.length; ++i) {
+        const apiConfig = loadApiConfig(targetConfig, apis.apis[i].id);
+        let needsSaving = false;
+        // Look for "rate-limiting" plugin
+        for (let plugin = 0; plugin < apiConfig.plugins.length; ++plugin) {
+            const apiPlugin = apiConfig.plugins[plugin];
+            if (oct2016_updatePlugin(apiPlugin))
+                needsSaving = true;
+        }
+        if (needsSaving) {
+            debug('API ' + apis.apis[i].id + ' updated: Plugins:');
+            debug(apiConfig.plugins);
+            saveApiConfig(targetConfig, apis.apis[i].id, apiConfig);
+            debug('Reloaded: ');
+            debug(loadApiConfig(targetConfig, apis.apis[i].id).plugins);
+        }
+    }
+
+    const plans = loadPlans(targetConfig);
+    let planNeedsSaving = false;
+    for (let i = 0; i < plans.plans.length; ++i) {
+        const plan = plans.plans[i];
+        if (plan.config && plan.config.plugins) {
+            for (let plugin = 0; plugin < plan.config.plugins.length; ++plugin) {
+                const planPlugin = plan.config.plugins[plugin];
+                if (oct2016_updatePlugin(planPlugin))
+                    planNeedsSaving = true;
+            }
+        }
+    }
+    if (planNeedsSaving) {
+        debug('Plans updated:');
+        debug(plans);
+        savePlans(targetConfig, plans);
+    }
+
+    saveGlobals(targetConfig, targetGlobals);
+}
+
+function oct2016_updatePlugin(apiPlugin) {
+    let changedSomething = false;
+    if (apiPlugin.name !== 'rate-limiting' &&
+        apiPlugin.name !== 'response-ratelimiting')
+        return false;
+    if (apiPlugin.config && apiPlugin.config.hasOwnProperty('continue_on_error')) {
+        const fault_tolerant = apiPlugin.config.continue_on_error;
+        delete apiPlugin.config.continue_on_error;
+        apiPlugin.config.fault_tolerant = fault_tolerant;
+        changedSomething = true;
+    }
+    if (apiPlugin.config && apiPlugin.config.hasOwnProperty('async')) {
+        delete apiPlugin.config.async;
+        changedSomething = true;
+    }
+    return changedSomething;
 }
 
 function updateStep2_June2016(targetConfig, sourceConfig) {
@@ -93,7 +198,7 @@ function updateStep2_June2016(targetConfig, sourceConfig) {
 
 function updateStep1_June2016(targetConfig, sourceConfig) {
     debug('Performing updateStep1_June2016()');
-    
+
     var targetGlobals = loadGlobals(targetConfig);
     // This is for version 1
     targetGlobals.version = 1;
@@ -106,18 +211,18 @@ function updateStep1_June2016(targetConfig, sourceConfig) {
         fs.mkdirSync(targetConfig.templatesDir);
     if (!fs.existsSync(targetConfig.emailDir))
         fs.mkdirSync(targetConfig.emailDir);
-    
+
     copyTextFile(sourceConfig.chatbotTemplates, targetConfig.chatbotTemplates);
     var emailTemplates = [
         'lost_password',
         'pending_approval',
         'verify_email'
     ];
-    for (var i=0; i<emailTemplates.length; ++i) {
+    for (var i = 0; i < emailTemplates.length; ++i) {
         var templateFileName = emailTemplates[i] + '.mustache';
         copyTextFile(path.join(sourceConfig.emailDir, templateFileName), path.join(targetConfig.emailDir, templateFileName));
     }
-    
+
     saveGlobals(targetConfig, targetGlobals);
 }
 
