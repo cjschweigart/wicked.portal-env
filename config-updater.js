@@ -120,11 +120,13 @@ function updateStep3_Oct2016(targetConfig, sourceConfig) {
     for (let i = 0; i < apis.apis.length; ++i) {
         const apiConfig = loadApiConfig(targetConfig, apis.apis[i].id);
         let needsSaving = false;
-        // Look for "rate-limiting" plugin
-        for (let plugin = 0; plugin < apiConfig.plugins.length; ++plugin) {
-            const apiPlugin = apiConfig.plugins[plugin];
-            if (oct2016_updatePlugin(apiPlugin))
-                needsSaving = true;
+        // Look for "rate-limiting" plugin (if we have plugins)
+        if (apiConfig && apiConfig.plugins) {
+            for (let plugin = 0; plugin < apiConfig.plugins.length; ++plugin) {
+                const apiPlugin = apiConfig.plugins[plugin];
+                if (oct2016_updatePlugin(apiPlugin))
+                    needsSaving = true;
+            }
         }
         if (needsSaving) {
             debug('API ' + apis.apis[i].id + ' updated: Plugins:');
