@@ -68,6 +68,11 @@ function loadApis(config) {
     return JSON.parse(fs.readFileSync(path.join(config.apisDir, 'apis.json'), 'utf8'));
 }
 
+function saveApis(config, apiDefs) {
+    debug('saveApis() - ' + config.apisDir);
+    fs.writeFileSync(path.join(config.apisDir, 'apis.json'), JSON.stringify(apiDefs, null, 2), 'utf8');
+}
+
 function getApiConfigFileName(config, apiId) {
     return path.join(config.apisDir, apiId, 'config.json');
 }
@@ -154,6 +159,20 @@ function updateStep3_Oct2016(targetConfig, sourceConfig) {
         debug(plans);
         savePlans(targetConfig, plans);
     }
+
+    // Part two: Make oauth2 settings explicit
+    let apisNeedSave = false;
+    for (let i = 0; i < apis.apis.length; ++i) {
+        const thisApi = apis.apis[i];
+        if (thisApi.auth && thisApi.auth == 'oauth2') {
+            thisApi.settings = {
+                token_expiration: 3600
+            };
+            apisNeedSave = true;
+        }
+    }
+    if (apisNeedSave)
+        saveApis(targetConfig, apis);
 
     saveGlobals(targetConfig, targetGlobals);
 }
