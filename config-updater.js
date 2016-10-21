@@ -165,9 +165,13 @@ function updateStep3_Oct2016(targetConfig, sourceConfig) {
     for (let i = 0; i < apis.apis.length; ++i) {
         const thisApi = apis.apis[i];
         if (thisApi.auth && thisApi.auth == 'oauth2') {
-            thisApi.settings = {
-                token_expiration: 3600
-            };
+            if (!thisApi.settings) {
+                thisApi.settings = {
+                    token_expiration: 3600
+                };
+            } else if (!thisApi.settings.token_expiration) {
+                thisApi.settings.token_expiration = 3600;
+            }
             apisNeedSave = true;
         }
     }
