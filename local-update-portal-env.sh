@@ -16,14 +16,10 @@ for wickedDir in \
     "wicked.portal" \
     "wicked.portal-api" \
     "wicked.portal-kong-adapter" \
-    "wicked.portal-mailer" \
-    "wicked.portal-chatbot" \
     "wicked.portal-kickstarter" \
     "portal" \
     "portal-api" \
     "portal-kong-adapter" \
-    "portal-mailer" \
-    "portal-chatbot" \
     "portal-kickstarter"; do
 
     if [ -d "../$wickedDir" ]; then 
