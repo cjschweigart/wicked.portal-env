@@ -45,6 +45,6 @@
     },
     "PORTAL_CHATBOT_URL": {
         "encrypted": false,
-        "value": "http://portal-api:3004"
+        "value": "http://portal-chatbot:3004"
     }
 }
