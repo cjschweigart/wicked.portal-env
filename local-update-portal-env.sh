@@ -13,10 +13,8 @@ mv portal-env-* ../portal-env.tgz
 # npm cache add ../portal-env.tgz
 
 for wickedDir in \
-    "wicked.portal" \
     "wicked.portal-api" \
     "wicked.portal-kickstarter" \
-    "portal" \
     "portal-api" \
     "portal-kickstarter"; do
 
