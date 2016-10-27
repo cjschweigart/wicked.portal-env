@@ -1,14 +1,5 @@
 FROM node:4
 
-RUN apt-get update && apt-get install -y \
-        wget \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#ENV DOCKERIZE_VERSION v0.2.0
-#RUN wget -nv https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-#    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-
 RUN mkdir -p /usr/src/portal-env /usr/src/app
 COPY . /usr/src/portal-env
 COPY package.all.json /usr/src/app/package.json
@@ -22,5 +13,9 @@ RUN npm install
 # ONBUILD RUN npm install
 ONBUILD RUN date -u "+%Y-%m-%d %H:%M:%S" > /usr/src/app/build_date
 ONBUILD COPY . /usr/src/app
+ONBUILD RUN if [ -d ".git" ]; then \
+        git log -1 --decorate=short > /usr/src/app/git_last_commit && \
+        git rev-parse --abbrev-ref HEAD > /usr/src/app/git_branch; \
+    fi 
 
 CMD [ "npm", "start" ]

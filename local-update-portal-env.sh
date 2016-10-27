@@ -15,11 +15,9 @@ mv portal-env-* ../portal-env.tgz
 for wickedDir in \
     "wicked.portal" \
     "wicked.portal-api" \
-    "wicked.portal-kong-adapter" \
     "wicked.portal-kickstarter" \
     "portal" \
     "portal-api" \
-    "portal-kong-adapter" \
     "portal-kickstarter"; do
 
     if [ -d "../$wickedDir" ]; then 
