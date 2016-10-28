@@ -172,6 +172,8 @@ function updateStep3_Oct2016(targetConfig, sourceConfig) {
             } else if (!thisApi.settings.token_expiration) {
                 thisApi.settings.token_expiration = 3600;
             }
+            if (!thisApi.settings.enable_implicit_grant)
+                thisApi.settings.enable_client_credentials = true;
             apisNeedSave = true;
         }
     }
