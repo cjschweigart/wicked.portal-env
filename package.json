@@ -1,20 +1,20 @@
 {
-  "version": "0.10.1", 
-  "license": "Apache-2.0", 
-  "author": "Martin Danielsson", 
-  "description": "Base package for the portal; contains all package dependencies to speed up Docker build.", 
+  "version": "0.11.0",
+  "license": "Apache-2.0",
+  "author": "Martin Danielsson",
+  "description": "Base package for the portal; contains all package dependencies to speed up Docker build.",
   "dependencies": {
-    "debug": "2.2.0", 
-    "node-uuid": "1.4.7", 
+    "debug": "2.2.0",
+    "node-uuid": "1.4.7",
     "request": "2.74.0"
-  }, 
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  }, 
-  "main": "env-reader.js", 
+  },
+  "main": "env-reader.js",
   "jshintConfig": {
-    "node": true, 
+    "node": true,
     "esversion": 6
-  }, 
+  },
   "name": "portal-env"
 }
