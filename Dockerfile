@@ -15,9 +15,8 @@ RUN set -x \
     && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
     && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
     && chmod +x /usr/local/bin/gosu \
-    && gosu nobody true \
-    && apt-get purge -y --auto-remove ca-certificates
-
+    && gosu nobody true
+    
 RUN mkdir -p /usr/src/portal-env /usr/src/app && chown -R wicked:wicked /usr/src && \
     mkdir -p /home/wicked && chown -R wicked:wicked /home/wicked
 
