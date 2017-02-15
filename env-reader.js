@@ -262,9 +262,10 @@ function gatherEnvVarsInObject(fileName, ob, envDict) {
     }
 }
 
+const _TIMEOUT = 2000;
 function tryGet(url, maxTries, tryCounter, timeout, callback) {
-    debug('Try #' + tryCounter + ' to GET ' + url);
-    request.get({ url: url }, function (err, res, body) {
+    debug('Try #' + tryCounter + ' to GET ' + url + ' (timeout: ' + _TIMEOUT + 'ms)');
+    request.get({ url: url, timeout: _TIMEOUT }, function (err, res, body) {
         var isOk = true;
         if (err || res.statusCode != 200) {
             if (tryCounter < maxTries || maxTries < 0)
