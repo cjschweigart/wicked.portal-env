@@ -3,16 +3,18 @@
 var fs = require('fs');
 var path = require('path');
 var debug = require('debug')('portal-env:config-updater');
+var cryptTools = require('./crypt-tools');
 
 var updater = function () { };
 
 var updateSteps = {
     1: updateStep1_June2016,
     2: updateStep2_June2016,
-    3: updateStep3_Oct2016
+    3: updateStep3_Oct2016,
+    4: updateStep4_Mar2017
 };
 
-updater.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
+updater.updateConfig = function (staticConfigPath, initialStaticConfigPath, configKey) {
     debug('updateConfig() - Target: ' + staticConfigPath + ', Source: ' + initialStaticConfigPath);
     var targetConfig = makeConfigPaths(staticConfigPath);
     var sourceConfig = makeConfigPaths(initialStaticConfigPath);
@@ -26,9 +28,22 @@ updater.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
 
     for (var step in updateSteps) {
         if (currentVersion < step)
-            updateSteps[step](targetConfig, sourceConfig);
+            updateSteps[step](targetConfig, sourceConfig, configKey);
     }
+
+    verifyConfigKey(staticConfigPath, configKey);
 };
+
+function verifyConfigKey(staticConfigPath, configKey) {
+    const globalData = JSON.parse(fs.readFileSync(path.join(staticConfigPath, 'globals.json'), 'utf8'));
+    if (globalData.configKeyCheck) {
+        const configKeyCheck = cryptTools.apiDecrypt(configKey, globalData.configKeyCheck);
+        const wickedCheckText = configKeyCheck.substring(40);
+        if (wickedCheckText !== 'wicked')
+            throw Error('Property configKeyCheck in globals.json did not contain expected check string; is your PORTAL_CONFIG_KEY wrong?.');
+        debug('updateConfig() - config key verified correct.');
+    }
+}
 
 function makeConfigPaths(basePath) {
     debug('makeConfigPaths() - ' + basePath);
@@ -112,8 +127,23 @@ function copyFile(source, target) {
     fs.writeFileSync(target, fs.readFileSync(source));
 }
 
-function updateStep3_Oct2016(targetConfig, sourceConfig) {
+function updateStep4_Mar2017(targetConfig, sourceConfig, configKey) {
+    debug('Performing updateStep4_Mar2017()');
+
+    var targetGlobals = loadGlobals(targetConfig);
+    targetGlobals.version = 4;
+    
+    // This is a checksum to ensure we are using the same config_key when editing
+    // and deploying
+    const salt = cryptTools.createRandomId();
+    targetGlobals.configKeyCheck = cryptTools.apiEncrypt(configKey, salt + 'wicked');
+
+    saveGlobals(targetConfig, targetGlobals);
+}
+
+function updateStep3_Oct2016(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep3_Oct2016()');
+    // configKey is not used here
 
     var targetGlobals = loadGlobals(targetConfig);
     targetGlobals.version = 3;
@@ -201,8 +231,9 @@ function oct2016_updatePlugin(apiPlugin) {
     return changedSomething;
 }
 
-function updateStep2_June2016(targetConfig, sourceConfig) {
+function updateStep2_June2016(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep2_June2016()');
+    // configKey not used here
 
     var targetGlobals = loadGlobals(targetConfig);
     targetGlobals.version = 2;
@@ -223,8 +254,9 @@ function updateStep2_June2016(targetConfig, sourceConfig) {
     saveGlobals(targetConfig, targetGlobals);
 }
 
-function updateStep1_June2016(targetConfig, sourceConfig) {
+function updateStep1_June2016(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep1_June2016()');
+    // configKey not used here
 
     var targetGlobals = loadGlobals(targetConfig);
     // This is for version 1

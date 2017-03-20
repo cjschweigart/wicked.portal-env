@@ -12,7 +12,7 @@ var cryptTools = require('./crypt-tools');
 
 var envReader = function () { };
 
-envReader.resolveStaticConfig = function() {
+envReader.resolveStaticConfig = function () {
     debug('resolveStaticConfig():');
     var configDir;
     if (process.env.PORTAL_API_STATIC_CONFIG) {
@@ -47,7 +47,7 @@ envReader.guessServiceUrl = function (defaultHost, defaultPort) {
     return url;
 };
 
-envReader.resolveApiUrl = function() {
+envReader.resolveApiUrl = function () {
     var apiUrl = process.env.PORTAL_API_URL;
     if (!apiUrl) {
         apiUrl = envReader.guessServiceUrl('portal-api', '3001');
@@ -58,15 +58,15 @@ envReader.resolveApiUrl = function() {
     return apiUrl;
 };
 
-envReader.updateConfig = function (staticConfigPath, initialStaticConfigPath) {
+envReader.updateConfig = function (staticConfigPath, initialStaticConfigPath, configKey) {
     debug('updateConfig() - Target: ' + staticConfigPath + ', Source: ' + initialStaticConfigPath);
-    configUpdater.updateConfig(staticConfigPath, initialStaticConfigPath);
+    configUpdater.updateConfig(staticConfigPath, initialStaticConfigPath, configKey);
 };
 
 envReader.checkEnvironment = function (staticConfigPath, keyText, envName) {
     debug('checkEnvironment() - ' + staticConfigPath + ', env: ' + envName);
     if (!keyText)
-        console.log('INFO: No key was passed to checkEnvironment; can only read plain text content.');
+        throw new Error('ERROR: No configuration key was passed to checkEnvironment. As of wicked 0.11.4, this is no longer allowed.');
     console.log('Reading config from: ' + staticConfigPath);
 
     if ('default' !== envName)
@@ -76,7 +76,7 @@ envReader.checkEnvironment = function (staticConfigPath, keyText, envName) {
     // Assign local IP to special env var, if not running in Docker
     if (!process.env.WICKED_IN_DOCKER) {
         var localIpAddress = getDefaultLocalIP();
-        
+
         // These variable names need to be "registered" in portal-kickstarter:utils.js 
         if (!process.env.LOCAL_IP)
             process.env.LOCAL_IP = localIpAddress;
@@ -116,7 +116,7 @@ function replaceEnvVarsInString(s) {
             !tempString.startsWith("${")) {
             let envVarName = tempString.substring(1);
             if (process.env[envVarName]) {
-                debug('Replacing ' + envVarName + ' with "' + process.env[envVarName] + '" in "' + tempString + '".' );
+                debug('Replacing ' + envVarName + ' with "' + process.env[envVarName] + '" in "' + tempString + '".');
                 tempString = process.env[envVarName];
             }
         } else {
@@ -127,7 +127,7 @@ function replaceEnvVarsInString(s) {
                 let envVarName = match[1]; // Capture group 1
                 // Replace regexp with value of env var
                 if (process.env[envVarName]) {
-                    debug('Replacing ' + envVarName + ' with "' + process.env[envVarName] + '" in "' + tempString + '".' );
+                    debug('Replacing ' + envVarName + ' with "' + process.env[envVarName] + '" in "' + tempString + '".');
                     tempString = tempString.replace(match[0], process.env[envVarName]);
                 }
             }
@@ -161,9 +161,9 @@ function loadEnvironment(staticConfigPath, keyText, envName) {
 
     // This has to be done already now to be able to resolve the data directories.
     if (process.env.PORTAL_API_DYNAMIC_CONFIG)
-        process.env.PORTAL_API_DYNAMIC_CONFIG = replaceEnvVarsInString(process.env.PORTAL_API_DYNAMIC_CONFIG);  
+        process.env.PORTAL_API_DYNAMIC_CONFIG = replaceEnvVarsInString(process.env.PORTAL_API_DYNAMIC_CONFIG);
     if (process.env.PORTAL_API_STATIC_CONFIG)
-        process.env.PORTAL_API_STATIC_CONFIG = replaceEnvVarsInString(process.env.PORTAL_API_STATIC_CONFIG);  
+        process.env.PORTAL_API_STATIC_CONFIG = replaceEnvVarsInString(process.env.PORTAL_API_STATIC_CONFIG);
 }
 
 envReader.sanityCheckDir = function (dirName) {
@@ -249,7 +249,7 @@ function gatherEnvVarsInObject(fileName, ob, envDict) {
             var envVarName = propValue.substring(1);
             pushProperty(envVarName);
         } else if (typeof propValue == "string" &&
-                   (propValue.indexOf('${') >= 0)) {
+            (propValue.indexOf('${') >= 0)) {
             var envRegExp = /\$\{([A-Za-z\_0-9]+)\}/g; // match ${VAR_NAME}
             var match = envRegExp.exec(propValue);
             while (match) {
@@ -311,11 +311,11 @@ envReader.Crypt = cryptTools;
 
 // ===== CorrelationIdHandler =====
 
-envReader.CorrelationIdHandler = function() {
+envReader.CorrelationIdHandler = function () {
     return function (req, res, next) {
         var correlationId = req.get('correlation-id');
         if (correlationId) {
-            req.correlationId = correlationId; 
+            req.correlationId = correlationId;
             return next();
         }
 

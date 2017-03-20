@@ -37,7 +37,7 @@
     "session-file-store": "0.2.0", 
     "swagger-ui": "2.1.5",
     "tmp": "0.0.30",
-    "wicked-sdk": "^0.11.1"
+    "wicked-sdk": "^0.11.3"
   }, 
   "description": "Base package for the portal; contains all package dependencies to speed up Docker build.", 
   "jshintConfig": {
