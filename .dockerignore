@@ -2,3 +2,5 @@ node_modules
 *.log
 .gitignore
 Dockerfile
+Dockerfile-alpine
+build.sh
