@@ -48,6 +48,9 @@ if [ "$1" = "--push" ]; then
     echo "============================================"
     echo "Pushing images..."
     echo "============================================"
+
+    docker push ${DOCKER_PREFIX}portal-env:${DOCKER_TAG}-onbuild
+    docker push ${DOCKER_PREFIX}portal-env:${DOCKER_TAG}-onbuild-alpine
 else
     if [ ! -z "$1" ]; then
         echo "WARNING: Unknown parameter '$1'; did you mean --push?"
