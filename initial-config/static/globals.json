@@ -2,6 +2,11 @@
     "version": 1,
     "title": "wicked.haufe.io API Portal",
     "footer": "&copy; 2016 Your Company Ltd.",
+    "layout": {
+        "linkMenuVisibleToGuest": true,
+        "showBuiltByInFooter": true,
+        "showBuildsInFooter": true
+    },
     "api": {
         "headerName": "X-ApiKey"
     },
