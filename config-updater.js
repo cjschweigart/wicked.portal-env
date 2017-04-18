@@ -129,7 +129,10 @@ function copyFile(source, target) {
 }
 
 /**
- * Add options in globals.json to allow customization of layout by the end user
+ * Add options in globals.json to allow
+ *  - customization of the layout by the end user
+ *  - edition of some views title tagline
+ *  - force the redirect to HTTPS
  */
 function updateStep5_Apr2017(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep5_Apr2017()');
@@ -156,7 +159,7 @@ function updateStep5_Apr2017(targetConfig, sourceConfig, configKey) {
             showBuiltBy: true,
             showBuilds: true
         },
-        sawggerUi: {
+        swaggerUi: {
             menu: {
                 homeLinkText: 'Home',
                 showContactLink: true,
