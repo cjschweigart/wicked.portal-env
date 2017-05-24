@@ -11,7 +11,8 @@ var updateSteps = {
     1: updateStep1_June2016,
     2: updateStep2_June2016,
     3: updateStep3_Oct2016,
-    4: updateStep4_Mar2017
+    4: updateStep4_Mar2017,
+    5: updateStep5_Apr2017
 };
 
 updater.updateConfig = function (staticConfigPath, initialStaticConfigPath, configKey) {
@@ -127,12 +128,76 @@ function copyFile(source, target) {
     fs.writeFileSync(target, fs.readFileSync(source));
 }
 
+/**
+ * Add options in globals.json to allow
+ *  - customization of the layout by the end user
+ *  - edition of some views title tagline
+ *  - force the redirect to HTTPS
+ */
+function updateStep5_Apr2017(targetConfig, sourceConfig, configKey) {
+    debug('Performing updateStep5_Apr2017()');
+
+    var targetGlobals = loadGlobals(targetConfig);
+    targetGlobals.version = 5;
+
+    // Add layouts options
+    targetGlobals.layouts = {
+        defautRootUrl: 'http://wicked.haufe.io',
+        defautRootUrlTarget: '_blank',
+        defautRootUrlText: null,
+        menu: {
+            homeLinkText: 'Home',
+            apisLinkVisibleToGuest: true,
+            applicationsLinkVisibleToGuest: true,
+            contactLinkVisibleToGuest: true,
+            contentLinkVisibleToGuest: true,
+            classForLoginSignupPosition: 'left',
+            showSignupLink: true,
+            loginLinkText: 'Log in'
+        },
+        footer: {
+            showBuiltBy: true,
+            showBuilds: true
+        },
+        swaggerUi: {
+            menu: {
+                homeLinkText: 'Home',
+                showContactLink: true,
+                showContentLink: false
+            }
+        }
+    };
+
+    // Add views options
+    targetGlobals.views = {
+        apis: {
+            showApiIcon: true,
+            titleTagline: 'This is the index of APIs which are available for this API Portal.'
+        },
+        applications: {
+            titleTagline: 'This page displays all your registered applications. \
+It also allows you to register a new application.'
+        },
+        application: {
+            titleTagline: 'This page lets you administer the owners of this application. You can add and remove \
+co-owners of the application. New co-owners must be already be registered in the portal \
+in order to make them co-owners of the application.'
+        }
+    };
+
+    // Add option to force redirection to HTTPS when website is called in HTTP
+    targetGlobals.network.forceRedirectToHttps = false;
+
+    // Save new changes
+    saveGlobals(targetConfig, targetGlobals);
+}
+
 function updateStep4_Mar2017(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep4_Mar2017()');
 
     var targetGlobals = loadGlobals(targetConfig);
     targetGlobals.version = 4;
-    
+
     // This is a checksum to ensure we are using the same config_key when editing
     // and deploying
     const salt = cryptTools.createRandomId();
