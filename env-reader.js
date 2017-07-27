@@ -69,10 +69,6 @@ envReader.checkEnvironment = function (staticConfigPath, keyText, envName) {
         throw new Error('ERROR: No configuration key was passed to checkEnvironment. As of wicked 0.11.4, this is no longer allowed.');
     console.log('Reading config from: ' + staticConfigPath);
 
-    if ('default' !== envName)
-        loadEnvironment(staticConfigPath, keyText, envName);
-    loadEnvironment(staticConfigPath, keyText, 'default');
-
     // Assign local IP to special env var, if not running in Docker
     if (!process.env.WICKED_IN_DOCKER) {
         var localIpAddress = getDefaultLocalIP();
@@ -88,7 +84,12 @@ envReader.checkEnvironment = function (staticConfigPath, keyText, envName) {
             process.env.LOCAL_PORTAL_URL = 'http://' + localIpAddress + ':3000';
         if (!process.env.LOCAL_API_URL)
             process.env.LOCAL_API_URL = 'http://' + localIpAddress + ':3001';
+        debug('Setting LOCAL_API_URL: ' + process.env.LOCAL_API_URL);
     }
+
+    if ('default' !== envName)
+        loadEnvironment(staticConfigPath, keyText, envName);
+    loadEnvironment(staticConfigPath, keyText, 'default');
 
     // Sanity check: Does PORTAL_API_STATIC_CONFIG match staticConfigPath?
     // If not, you have some configuration mismatch you should check on.
