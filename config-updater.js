@@ -12,7 +12,8 @@ var updateSteps = {
     2: updateStep2_June2016,
     3: updateStep3_Oct2016,
     4: updateStep4_Mar2017,
-    5: updateStep5_Apr2017
+    5: updateStep5_Apr2017,
+    6: updateStep6_Aug2017
 };
 
 updater.updateConfig = function (staticConfigPath, initialStaticConfigPath, configKey) {
@@ -55,6 +56,7 @@ function makeConfigPaths(basePath) {
     var templatesDir = path.join(basePath, 'templates');
     var emailDir = path.join(templatesDir, 'email');
     var plansFile = path.join(basePath, 'plans', 'plans.json');
+    var authServersDir = path.join(basePath, 'auth-servers');
 
     return {
         basePath: basePath,
@@ -65,7 +67,8 @@ function makeConfigPaths(basePath) {
         templatesDir: templatesDir,
         emailDir: emailDir,
         chatbotTemplates: path.join(templatesDir, 'chatbot.json'),
-        plansFile: plansFile
+        plansFile: plansFile,
+        authServersDir: authServersDir
     };
 }
 
@@ -126,6 +129,100 @@ function copyTextFile(source, target) {
 function copyFile(source, target) {
     debug('copyFile("' + source + '", "' + target + '")');
     fs.writeFileSync(target, fs.readFileSync(source));
+}
+
+function loadAuthServerList(config) {
+    var authServerDir = config.authServersDir;
+    debug('loadAuthServerList("' + authServerDir + '"');
+    debug('Checking directory ' + authServerDir + ' for auth servers.');
+    if (!fs.existsSync(authServerDir)) {
+        debug('No auth servers defined.');
+        return [];
+    } else {
+        const fileNames = fs.readdirSync(authServerDir);
+        const serverNames = [];
+        for (let i = 0; i < fileNames.length; ++i) {
+            const fileName = fileNames[i];
+            if (fileName.endsWith('.json')) {
+                const authServerName = fileName.substring(0, fileName.length - 5);
+                debug('Found auth server ' + authServerName);
+                serverNames.push(authServerName); // strip .json
+            }
+        }
+        return serverNames;
+    }
+}
+
+function loadAuthServer(config, authServerId) {
+    debug('loadAuthServer("' + authServerId + '")');
+    return JSON.parse(fs.readFileSync(path.join(config.authServersDir, authServerId + '.json')));
+}
+
+function saveAuthServer(config, authServerId, authServer) {
+    debug('saveAuthServer() - ' + authServerId);
+    fs.writeFileSync(path.join(config.authServersDir, authServerId + '.json'), JSON.stringify(authServer, null, 2));
+}
+
+/**
+ * Adapt the Kong configuration of the APIs to the new Kong API as of
+ * Kong 0.10.x, most notably change request_uri to an array uris and
+ * map strip_request_path to strip_uri.
+ */
+function updateStep6_Aug2017(targetConfig, sourceConfig, configKey) {
+    debug('Performing updateStep6_Aug2017()');
+
+    var targetGlobals = loadGlobals(targetConfig);
+    targetGlobals.version = 6;
+
+    var updateApiConfig = function (cfg) {
+        if (cfg.request_path) {
+            cfg.uris = [cfg.request_path]; // wrap in array
+            delete cfg.request_path;
+        }
+        if (cfg.hasOwnProperty('strip_request_path')) {
+            cfg.strip_uri = cfg.strip_request_path;
+            delete cfg.strip_request_path;
+        }
+        if (!cfg.hasOwnProperty('http_if_terminated')) {
+            cfg.http_if_terminated = true;
+        }
+        return cfg;
+    };
+
+    // Kong API change (tsk tsk, don't do that, please)
+    // Change all request_path and strip_request_path occurrances
+    // to uris and strip_uris.
+    const apis = loadApis(targetConfig);
+    for (let i = 0; i < apis.apis.length; ++i) {
+        const apiConfig = loadApiConfig(targetConfig, apis.apis[i].id);
+        let needsSaving = false;
+        // Look for "api.request_path"
+        if (apiConfig && apiConfig.api) {
+            apiConfig.api = updateApiConfig(apiConfig.api);
+            needsSaving = true;
+        }
+        if (needsSaving) {
+            debug('API ' + apis.apis[i].id + ' updated.');
+            debug(apiConfig.api);
+            saveApiConfig(targetConfig, apis.apis[i].id, apiConfig);
+            debug('Reloaded: ');
+            debug(loadApiConfig(targetConfig, apis.apis[i].id).api);
+        }
+    }
+
+    // Also check all Authorization Servers for this setting; these also
+    // have a request_path set which needs to be mapped to a uris array.
+    var authServers = loadAuthServerList(targetConfig);
+    for (let i = 0; i < authServers.length; ++i) {
+        var authServerId = authServers[i];
+        var authServer = loadAuthServer(targetConfig, authServerId);
+        if (authServer.config && authServer.config.api) {
+            authServer.config.api = updateApiConfig(authServer.config.api);
+            saveAuthServer(targetConfig, authServerId, authServer);
+        }
+    }
+
+    saveGlobals(targetConfig, targetGlobals);
 }
 
 /**
