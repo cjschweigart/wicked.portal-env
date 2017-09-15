@@ -167,6 +167,8 @@ function saveAuthServer(config, authServerId, authServer) {
  * Adapt the Kong configuration of the APIs to the new Kong API as of
  * Kong 0.10.x, most notably change request_uri to an array uris and
  * map strip_request_path to strip_uri.
+ * 
+ * Add a new section sessionStore to globals, prefill with 'file'.
  */
 function updateStep6_Aug2017(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep6_Aug2017()');
@@ -220,6 +222,16 @@ function updateStep6_Aug2017(targetConfig, sourceConfig, configKey) {
             authServer.config.api = updateApiConfig(authServer.config.api);
             saveAuthServer(targetConfig, authServerId, authServer);
         }
+    }
+
+    if (!targetGlobals.sessionStore) {
+        debug('Adding a default sessionStore property.');
+        targetGlobals.sessionStore = {
+            type: 'file',
+            host: 'portal-redis',
+            port: 6379,
+            password: ''
+        };
     }
 
     saveGlobals(targetConfig, targetGlobals);

@@ -146,7 +146,7 @@ function loadEnvironment(staticConfigPath, keyText, envName) {
     var envFile = JSON.parse(fs.readFileSync(envFileName, 'utf8'));
     for (var varName in envFile) {
         if (process.env[varName]) {
-            console.log('Environment variable ' + varName + ' is already set. Skipping in this configuration.');
+                debug('Environment variable ' + varName + ' is already set to "' + process.env[varName] + '". Skipping in this configuration.');
             continue;
         }
         var varProps = envFile[varName];

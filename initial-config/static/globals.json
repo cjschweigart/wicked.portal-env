@@ -16,6 +16,12 @@
         "mailerUrl": "$PORTAL_MAILER_URL",
         "chatbotUrl": "$PORTAL_CHATBOT_URL"
     },
+    "sessionStore": {
+        "type": "$PORTAL_SESSIONSTORE_TYPE",
+        "host": "$PORTAL_SESSIONSTORE_HOST",
+        "port": "6739",
+        "password": ""
+    },
     "db": {
         "staticConfig": "$PORTAL_API_STATIC_CONFIG",
         "dynamicConfig": "$PORTAL_API_DYNAMIC_CONFIG"
