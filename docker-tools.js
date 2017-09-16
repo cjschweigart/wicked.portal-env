@@ -40,7 +40,7 @@ dockerTools.getMatchingTag = function (namespace, imageName, tagName, callback) 
             const baseName = tagName;
             if (imageName.indexOf('portal-env') > 0) {
                 exactTag = baseName + '-onbuild';
-                fallbackTag = 'next-ombuild';
+                fallbackTag = 'next-onbuild';
             } else {
                 exactTag = baseName;
                 fallbackTag = 'next';
