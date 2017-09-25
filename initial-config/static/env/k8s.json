@@ -1,0 +1,29 @@
+{
+  "HELM_NAME": {
+    "value": "undefined-undefined"
+  },
+  "K8S_NAMESPACE": {
+    "value": "default"
+  },
+  "PORTAL_API_URL": {
+    "value": "http://${HELM_NAME}-api.${K8S_NAMESPACE}.svc.cluster.local:3001"
+  },
+  "PORTAL_CHATBOT_URL": {
+    "value": "http://${HELM_NAME}-chatbot.${K8S_NAMESPACE}.svc.cluster.local:3004"
+  },
+  "PORTAL_KONG_ADAPTER_URL": {
+    "value": "http://${HELM_NAME}-kong-adapter.${K8S_NAMESPACE}.svc.cluster.local:3002"
+  },
+  "PORTAL_KONG_ADMIN_URL": {
+    "value": "http://${HELM_NAME}-kong.${K8S_NAMESPACE}.svc.cluster.local:8001"
+  },
+  "PORTAL_MAILER_URL": {
+    "value": "http://${HELM_NAME}-mailer.${K8S_NAMESPACE}.svc.cluster.local:3003"
+  },
+  "PORTAL_PORTAL_URL": {
+    "value": "http://${HELM_NAME}-portal.${K8S_NAMESPACE}.svc.cluster.local:3000"
+  },
+  "PORTAL_SESSIONSTORE_HOST": {
+    "value": "${HELM_NAME}-redis.${K8S_NAMESPACE}.svc.cluster.local"
+  }
+}

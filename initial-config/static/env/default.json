@@ -54,5 +54,17 @@
     "PORTAL_SESSIONSTORE_HOST": {
         "encrypted": false,
         "value": "portal-redis"
+    },
+    "PORTAL_SESSIONSTORE_PORT": {
+        "encrypted": false,
+        "value": "6379"
+    },
+    "PORTAL_SESSIONSTORE_PASSWORD": {
+        "encrypted": false,
+        "value": ""
+    },
+    "PORTAL_INITIALUSERS1_PASSWORD": {
+        "encrypted": false,
+        "value": "wicked"
     }
 }
