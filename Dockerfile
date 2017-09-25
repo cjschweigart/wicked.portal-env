@@ -25,7 +25,7 @@ COPY . /usr/src/portal-env
 COPY package.all.json /usr/src/app/package.json
 
 WORKDIR /usr/src/app
-RUN cd ../portal-env && npm pack && mv portal-env-* ../portal-env.tgz && cd /usr/src/app
+RUN cd /usr/src/portal-env && npm pack && mv /usr/src/portal-env/portal-env-* /usr/src/portal-env.tgz && cd /usr/src/app
 RUN npm install
 
 # We install all node_modules in this base image; no need to do it later

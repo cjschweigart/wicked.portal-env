@@ -12,6 +12,9 @@ if [ -z "$DOCKER_TAG" ]; then
     export DOCKER_TAG=dev
 fi
 
+git log -1 --decorate=short > git_last_commit
+git rev-parse --abbrev-ref HEAD > git_branch
+
 echo "============================================"
 echo "Building normal image..."
 echo "============================================"

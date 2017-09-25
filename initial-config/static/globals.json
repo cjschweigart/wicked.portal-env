@@ -16,6 +16,12 @@
         "mailerUrl": "$PORTAL_MAILER_URL",
         "chatbotUrl": "$PORTAL_CHATBOT_URL"
     },
+    "sessionStore": {
+        "type": "$PORTAL_SESSIONSTORE_TYPE",
+        "host": "$PORTAL_SESSIONSTORE_HOST",
+        "port": "$PORTAL_SESSIONSTORE_PORT",
+        "password": "$PORTAL_SESSIONSTORE_PASSWORD"
+    },
     "db": {
         "staticConfig": "$PORTAL_API_STATIC_CONFIG",
         "dynamicConfig": "$PORTAL_API_DYNAMIC_CONFIG"
@@ -26,7 +32,7 @@
             "firstName": "Admin",
             "lastName": "User",
             "email": "admin@foo.com",
-            "password": "wicked",
+            "password": "$PORTAL_INITIALUSERS0_PASSWORD",
             "validated": true,
             "groups": [
                 "admin"
