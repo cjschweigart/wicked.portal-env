@@ -19,8 +19,8 @@
     "sessionStore": {
         "type": "$PORTAL_SESSIONSTORE_TYPE",
         "host": "$PORTAL_SESSIONSTORE_HOST",
-        "port": "6739",
-        "password": ""
+        "port": "$PORTAL_SESSIONSTORE_PORT",
+        "password": "$PORTAL_SESSIONSTORE_PASSWORD"
     },
     "db": {
         "staticConfig": "$PORTAL_API_STATIC_CONFIG",
@@ -32,7 +32,7 @@
             "firstName": "Admin",
             "lastName": "User",
             "email": "admin@foo.com",
-            "password": "wicked",
+            "password": "$PORTAL_INITIALUSERS0_PASSWORD",
             "validated": true,
             "groups": [
                 "admin"
