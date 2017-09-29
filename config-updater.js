@@ -181,6 +181,16 @@ function saveEnv(config, envName, envData) {
     fs.writeFileSync(path.join(config.envDir, envName + '.json'), JSON.stringify(envData, null, 2));
 }
 
+function loadKickstarter(config) {
+    debug('loadKickstarter()');
+    return JSON.parse(fs.readFileSync(path.join(config.basePath, 'kickstarter.json')));
+}
+
+function saveKickstarter(config, kickData) {
+    debug('saveKickstarter()');
+    fs.writeFileSync(path.join(config.basePath, 'kickstarter.json'), JSON.stringify(kickData, null, 2));
+}
+
 /**
  * Adapt the scopes configuration inside API definitions to include
  * descriptions (default to the name of the scope for now).
@@ -236,10 +246,12 @@ function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
     const updateEnv = function (source, target) {
         let updated = false;
         if (!target.PORTAL_KONG_OAUTH2_URL) {
+            debug('Adding ' + JSON.stringify(source.PORTAL_KONG_OAUTH2_URL));
             target.PORTAL_KONG_OAUTH2_URL = source.PORTAL_KONG_OAUTH2_URL;
             updated = true;
         }
         if (!target.PORTAL_AUTHSERVER_URL) {
+            debug('Adding ' + JSON.stringify(source.PORTAL_AUTHSERVER_URL));
             target.PORTAL_AUTHSERVER_URL = source.PORTAL_AUTHSERVER_URL;
             updated = true;            
         }
@@ -247,8 +259,9 @@ function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
     };
 
     const targetDefaultEnv = loadEnv(targetConfig, 'default');
+    debug(targetDefaultEnv);
     const sourceDefaultEnv = loadEnv(sourceConfig, 'default');
-    if (updateEnv(sourceDefaultEnv, targetDefaultAuthServer))
+    if (updateEnv(sourceDefaultEnv, targetDefaultEnv))
         saveEnv(targetConfig, 'default', targetDefaultEnv);
 
     // Also for k8s env
@@ -260,6 +273,12 @@ function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
     } else {
         // Does not yet exist, just copy it
         saveEnv(targetConfig, 'k8s', sourceK8sEnv);
+    }
+    const kickstarter = loadKickstarter(targetConfig);
+    if (!kickstarter.envs.find(e => e === 'k8s')) {
+        // Add a k8s env
+        kickstarter.envs.push('k8s');
+        saveKickstarter(targetConfig, kickstarter);
     }
 
     saveGlobals(targetConfig, targetGlobals);
