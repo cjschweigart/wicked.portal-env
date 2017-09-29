@@ -274,6 +274,23 @@ function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
         // Does not yet exist, just copy it
         saveEnv(targetConfig, 'k8s', sourceK8sEnv);
     }
+    // Don't update if there is no localhost env yet
+    if (existsEnv(targetConfig, 'localhost')) {
+        const localEnv = loadEnv(targetConfig, 'localhost');
+        // Special handling of new components
+        if (!localEnv.PORTAL_KONG_OAUTH2_URL) {
+            localEnv.PORTAL_KONG_OAUTH2_URL = {
+                value: "http://${LOCAL_IP}:3002"
+            };
+        }
+        if (!localEnv.PORTAL_AUTHSERVER_URL) {
+            localEnv.PORTAL_AUTHSERVER_URL = {
+                value: "http://${LOCAL_IP}:3005"
+            };
+        }
+    }
+
+
     const kickstarter = loadKickstarter(targetConfig);
     if (!kickstarter.envs.find(e => e === 'k8s')) {
         // Add a k8s env
