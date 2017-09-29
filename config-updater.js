@@ -13,7 +13,8 @@ var updateSteps = {
     3: updateStep3_Oct2016,
     4: updateStep4_Mar2017,
     5: updateStep5_Apr2017,
-    6: updateStep6_Aug2017
+    6: updateStep6_Aug2017,
+    10: updateStep10_v1_0_0
 };
 
 updater.updateConfig = function (staticConfigPath, initialStaticConfigPath, configKey) {
@@ -161,6 +162,41 @@ function loadAuthServer(config, authServerId) {
 function saveAuthServer(config, authServerId, authServer) {
     debug('saveAuthServer() - ' + authServerId);
     fs.writeFileSync(path.join(config.authServersDir, authServerId + '.json'), JSON.stringify(authServer, null, 2));
+}
+
+/**
+ * Adapt the scopes configuration inside API definitions to include
+ * descriptions (default to the name of the scope for now).
+ */
+function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
+    debug('Performing updateStep6_Aug2017()');
+
+    const targetGlobals = loadGlobals(targetConfig);
+    targetGlobals.version = 10;
+
+    const apis = loadApis(targetConfig);
+    let needsSaving = false;
+    for (let i = 0; i < apis.apis.length; ++i) {
+        const api = apis.apis[i];
+        if (api.auth !== 'oauth2')
+            continue;
+        if (api.settings) {
+            if (api.settings.scopes) {
+                const newScopes = {};
+                for (let scope in api.settings.scopes) {
+                    newScopes[scope] = { description: scope };
+                }
+                api.settings.scopes = newScopes;
+                needsSaving = true;
+            }
+        }
+    }
+
+    if (needsSaving) {
+        saveApis(targetConfig, apis);
+    }
+
+    saveGlobals(targetConfig, targetGlobals);
 }
 
 /**

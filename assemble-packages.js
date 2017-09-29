@@ -12,7 +12,8 @@ var dirs = [
     'wicked.portal-mailer',
     'wicked.portal-kickstarter',
     'wicked.portal-test/portal-api',
-    'wicked.portal-test/portal-kong-adapter'
+    'wicked.portal-test/portal-kong-adapter',
+    'wicked.portal-kong-oauth2'
 ];
 
 var baseDir = path.resolve(path.join(__dirname, '..'));
