@@ -1,4 +1,10 @@
 {
+    "HELM_NAME": {
+        "value": "undefined-undefined"
+    },
+    "K8S_NAMESPACE": {
+        "value": "default"
+    },
     "PORTAL_CONFIG_BASE": {
         "encrypted": false,
         "value": "/var/portal-api/"

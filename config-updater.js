@@ -258,11 +258,16 @@ function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
         return updated;
     };
 
+    const sourceDefaultEnv = loadEnv(sourceConfig, 'default');
+
     const targetDefaultEnv = loadEnv(targetConfig, 'default');
     debug(targetDefaultEnv);
-    const sourceDefaultEnv = loadEnv(sourceConfig, 'default');
-    if (updateEnv(sourceDefaultEnv, targetDefaultEnv))
-        saveEnv(targetConfig, 'default', targetDefaultEnv);
+    updateEnv(sourceDefaultEnv, targetDefaultEnv);
+    if (!targetDefaultEnv.HELM_NAME)
+        targetDefaultEnv.HELM_NAME = sourceDefaultEnv.HELM_NAME;
+    if (!targetDefaultEnv.K8S_NAMESPACE)
+        targetDefaultEnv.K8S_NAMESPACE = sourceDefaultEnv.K8S_NAMESPACE;
+    saveEnv(targetConfig, 'default', targetDefaultEnv);
 
     // Also for k8s env
     const sourceK8sEnv = loadEnv(sourceConfig, 'k8s');
