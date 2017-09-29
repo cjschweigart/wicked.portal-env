@@ -7,7 +7,7 @@
             "name": "local",
             "type": "local",
             "config": {
-                "authorizationEndpoint": "/{{name}}/api/{{api}}/authorize",
+                "authorizeEndpoint": "/{{name}}/api/{{api}}/authorize",
                 "tokenEndpoint": "/{{name}}/api/{{api}}/token",
                 "profileEndpoint": "/{{name}}/api/{{api}}/profile"
             }
