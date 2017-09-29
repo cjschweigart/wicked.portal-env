@@ -177,6 +177,24 @@ a {
     border-color: #8a2f23
 }
 
+.btn-oauth2 {
+    color: #333;
+    background-color: #f2f2f2;
+    border-color: #ccc
+}
+
+.btn-oauth2.focus, .btn-oauth2:focus {
+    color: #333;
+    background-color: #d9d9d9;
+    border-color: #8c8c8c
+}
+
+.btn-oauth2.active, .btn-oauth2:active, .btn-oauth2:hover, .open > .dropdown-toggle.btn-oauth2 {
+    color: #333;
+    background-color: #d9d9d9;
+    border-color: #adadad
+}
+
 
 /* MARKETING CONTENT
 -------------------------------------------------- */

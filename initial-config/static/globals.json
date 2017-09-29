@@ -44,6 +44,12 @@
         "secretKey": "reCaptchaSecretKey",
         "websiteKey": "reCaptchaWebsiteKey"
     },
+    "kongAdapter": {
+    "useKongAdapter": true,
+    "ignoreList": [
+      "plugin-name"
+    ]
+   },
     "mailer": {
         "useMailer": false,
         "senderEmail": "apiportal@yourcompany.com",
@@ -107,6 +113,18 @@
             "clientSecret": "google-client-secret",
             "clientID": "google-app-client-id",
             "callbackURL": "https://portal.yourcompany.com/callback/google"
+        },
+        "oauth2": {
+            "useOauth2": true,
+            "authorizationURL": "https://identity.yourcompany.com/adfs/oauth2/authorize",
+            "tokenURL": "https://identity.yourcompany.com/adfs/oauth2/token",
+            "clientID": "this-is-your-client-id",
+            "clientSecret": "this-is-your-client-secret",
+            "callbackURL": "https://portal.yourcompany.com/callback",
+            "customIdField": "upn",
+            "firstNameField": "given_name",
+            "lastNameField": "family_name",
+            "emailField": "email"
         }
     }
 }
