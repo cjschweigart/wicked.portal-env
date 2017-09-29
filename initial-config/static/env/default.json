@@ -35,6 +35,10 @@
         "encrypted": false,
         "value": "http://portal-kong-adapter:3002"
     },
+    "PORTAL_KONG_OAUTH2_URL": {
+        "encrypted": false,
+        "value": "http://portal-kong-oauth2:3006"
+    },
     "PORTAL_KONG_ADMIN_URL": {
         "encrypted": false,
         "value": "http://kong:8001"
@@ -46,6 +50,10 @@
     "PORTAL_CHATBOT_URL": {
         "encrypted": false,
         "value": "http://portal-chatbot:3004"
+    },
+    "PORTAL_AUTHSERVER_URL": {
+        "encrypted": false,
+        "value": "http://portal-auth:3005"
     },
     "PORTAL_SESSIONSTORE_TYPE": {
         "encrypted": false,

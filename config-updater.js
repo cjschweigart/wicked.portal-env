@@ -58,6 +58,7 @@ function makeConfigPaths(basePath) {
     var emailDir = path.join(templatesDir, 'email');
     var plansFile = path.join(basePath, 'plans', 'plans.json');
     var authServersDir = path.join(basePath, 'auth-servers');
+    var envDir = path.join(basePath, 'env');
 
     return {
         basePath: basePath,
@@ -69,7 +70,8 @@ function makeConfigPaths(basePath) {
         emailDir: emailDir,
         chatbotTemplates: path.join(templatesDir, 'chatbot.json'),
         plansFile: plansFile,
-        authServersDir: authServersDir
+        authServersDir: authServersDir,
+        envDir: envDir
     };
 }
 
@@ -164,14 +166,36 @@ function saveAuthServer(config, authServerId, authServer) {
     fs.writeFileSync(path.join(config.authServersDir, authServerId + '.json'), JSON.stringify(authServer, null, 2));
 }
 
+function existsEnv(config, envName) {
+    debug(`existsEnv(${envName})`);
+    return fs.existsSync(path.join(config.envDir, envName + '.json'));
+}
+
+function loadEnv(config, envName) {
+    debug(`loadEnv(${envName})`);
+    return JSON.parse(fs.readFileSync(path.join(config.envDir, envName + '.json')));
+}
+
+function saveEnv(config, envName, envData) {
+    debug(`saveEnv(${envName})`);
+    fs.writeFileSync(path.join(config.envDir, envName + '.json'), JSON.stringify(envData, null, 2));
+}
+
 /**
  * Adapt the scopes configuration inside API definitions to include
  * descriptions (default to the name of the scope for now).
+ * 
+ * Add new network settings for added components
+ * - Kong OAuth2 Adapter
+ * - Auth Server
+ * 
+ * Add default Auth Server configuration
  */
 function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
     debug('Performing updateStep6_Aug2017()');
 
     const targetGlobals = loadGlobals(targetConfig);
+    const sourceGlobals = loadGlobals(sourceConfig);
     targetGlobals.version = 10;
 
     const apis = loadApis(targetConfig);
@@ -194,6 +218,48 @@ function updateStep10_v1_0_0(targetConfig, sourceConfig, configKey) {
 
     if (needsSaving) {
         saveApis(targetConfig, apis);
+    }
+
+    if (!targetGlobals.network.kongOAuth2Url)
+        targetGlobals.network.kongOAuth2Url = sourceGlobals.network.kongOAuth2Url;
+    if (!targetGlobals.portal) // Default authMethods
+        targetGlobals.portal = sourceGlobals.portal;
+        
+    if (!fs.existsSync(targetConfig.authServersDir))
+        fs.mkdirSync(targetConfig.authServersDir);
+    const targetDefaultAuthServer = path.join(targetConfig.authServersDir, 'default.json');
+    const sourceDefaultAuthServer = path.join(sourceConfig.authServersDir, 'default.json');
+    if (!fs.existsSync(targetDefaultAuthServer))
+        copyFile(sourceDefaultAuthServer, targetDefaultAuthServer);
+
+    // Now do some env file updating...
+    const updateEnv = function (source, target) {
+        let updated = false;
+        if (!target.PORTAL_KONG_OAUTH2_URL) {
+            target.PORTAL_KONG_OAUTH2_URL = source.PORTAL_KONG_OAUTH2_URL;
+            updated = true;
+        }
+        if (!target.PORTAL_AUTHSERVER_URL) {
+            target.PORTAL_AUTHSERVER_URL = source.PORTAL_AUTHSERVER_URL;
+            updated = true;            
+        }
+        return updated;
+    };
+
+    const targetDefaultEnv = loadEnv(targetConfig, 'default');
+    const sourceDefaultEnv = loadEnv(sourceConfig, 'default');
+    if (updateEnv(sourceDefaultEnv, targetDefaultAuthServer))
+        saveEnv(targetConfig, 'default', targetDefaultEnv);
+
+    // Also for k8s env
+    const sourceK8sEnv = loadEnv(sourceConfig, 'k8s');
+    if (existsEnv(targetConfig, 'k8s')) {
+        const targetK8sEnv = loadEnv(targetConfig, 'k8s');
+        if (updateEnv(sourceK8sEnv, targetK8sEnv))
+            saveEnv(targetConfig, 'k8s', targetK8sEnv);
+    } else {
+        // Does not yet exist, just copy it
+        saveEnv(targetConfig, 'k8s', sourceK8sEnv);
     }
 
     saveGlobals(targetConfig, targetGlobals);

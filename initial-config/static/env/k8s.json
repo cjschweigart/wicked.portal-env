@@ -11,8 +11,14 @@
   "PORTAL_CHATBOT_URL": {
     "value": "http://${HELM_NAME}-chatbot.${K8S_NAMESPACE}.svc.cluster.local:3004"
   },
+  "PORTAL_AUTHSERVER_URL": {
+    "value": "http://${HELM_NAME}-auth.${K8S_NAMESPACE}.svc.cluster.local:3004"
+  },
   "PORTAL_KONG_ADAPTER_URL": {
     "value": "http://${HELM_NAME}-kong-adapter.${K8S_NAMESPACE}.svc.cluster.local:3002"
+  },
+  "PORTAL_KONG_OAUTH2_URL": {
+    "value": "http://${HELM_NAME}-kong-oauth2.${K8S_NAMESPACE}.svc.cluster.local:3006"
   },
   "PORTAL_KONG_ADMIN_URL": {
     "value": "http://${HELM_NAME}-kong.${K8S_NAMESPACE}.svc.cluster.local:8001"

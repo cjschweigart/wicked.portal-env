@@ -1,0 +1,37 @@
+{
+    "id": "default",
+    "name": "default",
+    "desc": "Default Authorization Server",
+    "authMethods": [
+        {
+            "name": "local",
+            "type": "local",
+            "config": {
+                "authorizationEndpoint": "/{{name}}/api/{{api}}/authorize",
+                "tokenEndpoint": "/{{name}}/api/{{api}}/token",
+                "profileEndpoint": "/{{name}}/api/{{api}}/profile"
+            }
+        }
+    ],
+    "config": {
+        "api": {
+            "name": "portal-auth",
+            "upstream_url": "$PORTAL_AUTHSERVER_URL",
+            "preserve_host": false,
+            "uris": [
+                "/auth"
+            ],
+            "strip_uri": false
+        },
+        "plugins": [
+            {
+                "name": "correlation-id",
+                "config": {
+                    "header_name": "Correlation-Id",
+                    "generator": "uuid",
+                    "echo_downstream": false
+                }
+            }
+        ]
+    }
+}
